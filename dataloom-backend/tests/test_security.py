@@ -56,3 +56,12 @@ class TestValidateQueryString:
     def test_arbitrary_dunder_blocked(self):
         with pytest.raises(HTTPException):
             validate_query_string("obj.__globals__")
+
+    def test_at_prefix_blocked(self):
+        """@ lets you reference in-scope Python vars like pd, which can chain to os.system"""
+        with pytest.raises(HTTPException):
+            validate_query_string("@pd.io.common.os.system('echo test')")
+
+    def test_at_prefix_read_csv_blocked(self):
+        with pytest.raises(HTTPException):
+            validate_query_string("@pd.read_csv('/etc/passwd')")
